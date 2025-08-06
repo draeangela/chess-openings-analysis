@@ -1,0 +1,116 @@
+Drae Vizcarra
+11/13/24
+Chess Openings Dataset Analysis
+
+INTRODUCTION
+As a mediocre chess kid who never got above the rating 500, I was interested in analyzing a dataset that could help view chess from a 
+different perspective and better understand the game. The dataset contains statistics for 1885 unique chess openings from both the white 
+and black side. I was most interested in analyzing the success of these different openings, denoted both by their name and ECO code, and 
+the variables that contributed to higher win rates. The questions I wanted to answer using this dataset were:
+    1. Which openings by their ECO codes are considered "good"? For white (who has first-move advantage), a win rate above 50% is considered
+    high, and 45% for black. 
+    2. Do more developed openings correlate to higher win percentages? Does this differ significantly between white and black? Whether or not 
+    an opening is "developed" is dependent on its number of moves. 
+    3. Is there a correlation between an opening's popularity (number of games played) and its success rate?
+    4. Are there specific groups of openings (same ECO code) most commonly used by higher-rated players (top 25%)? If so, what are they?
+
+The openings in the set contain data for games between players rated above 1000, thus conclusions from this dataset are made only pertain
+to that level of chess. Additionally, the dataset places a particular emphasis on the Alekhine Defense, which means that conclusions may be 
+biased toward this opening, and other openings may have less comprehensive data. The dataset also includes a "Last Played" date, meaning
+the dataset only captures most recent games, not accounting for historical trends or older strategies that were once popular but have fallen 
+out of favor. Under these assumptions, I proceeded with answering my questions.
+
+I first created a ChessOpening object class, which extracted columns from the CSV file as attributes. I selected only a few attributes that
+I thought were necessary to answer my questions: 
+    opening: Opening name
+    color: Player color
+    eco: ECO code (opening defined by the Encyclopedia of Chess Openings)
+    numGames: Number of games played/recorded
+    avgRating: Average rating of players using that opening
+    playerWinPercent: Win percentage
+    movesList: List of opening's moves 
+
+I removed the rows that represented general opening categories with ECO ranges (e.g., A00-A20), as their variations were already included 
+in other rows.
+
+ALGORITHMS:
+1. Which openings by their ECO codes are considered "good"? For white (who has first-move advantage), a win rate above 50% is considered
+high, and 45% for black. 
+For this question, I created the function findSufficientWinRates() to extract the openings with "good" win percentages 
+(determined by the threshold stated above) and allocated them into a ArrayList of two ArrayLists of Chess Openings, one for "good" 
+white chess openings, the other for "good" black chess openings
+
+2. Do more developed openings correlate to higher win percentages? Does this differ significantly between white and black? Whether or not 
+an opening is "developed" is dependent on its number of moves. 
+3. Is there a correlation between an opening's popularity (number of games played) and its success rate?
+For the second and third questions, I used Pearson's correlation coefficient formula in a function I created called findCorrelationCoeff() 
+to calculate the correlation coefficients between two variables. The first calculation was for the correlation between win percentage and 
+development level, and the second for the correlation between win percentage and popularity, separately for both White and Black. Afterward,
+I applied Fisher's Transformation to compare the correlation coefficients between White and Black. This process involved converting the 
+r-values into z-scores, comparing them, extracting a p-value, and testing the p-value against an alpha level of 0.05 to determine if there
+was a significant difference between the two.
+
+4. Are there specific groups of openings (same ECO code) most commonly used by higher-rated players (top 25%)? If so, what are they?
+For this question, I first determined if there was a significant difference between the number of ECO codes used by higher-rated 
+players (top 25 percentile) versus the overall dataset. I did this by recording the frequency of each ECO code both overall and among the 
+higher-rated players, then converting those frequencies into z-scores to standardize and make them comparable. For each ECO code where the
+z-score for the higher-rated players was greater than the overall z-score, I performed a hypothesis test to compare the difference in 
+z-scores. I then tested the p-value against an alpha level of 0.05. The ECO codes that passed this hypothesis test (where the p-value was
+less than 0.05, thus rejecting the null hypothesis) were the ones preferred and used more frequently by higher-rated players.
+
+In executing these algorithms, I had little trouble with programming them themselves, but rather parsing the CSV file. I had  
+numerous errors in my constructor (the Scanner argument one) with no apparent mistakes in the code. Turns out, the error lied in the CSV file, 
+where some of the lines were malformed. To solve this, I identified which lines were malformed with a try-catch clause printing lines which
+generated errors when parsing. I then manually deleted the corrupted characters in the CSV file. 
+
+RESULTS: 
+Question One:
+For white, there were 54 openings with a win percentage higher than 50%. The majority of these (I eyeballed this, so it is unknown if the
+difference between the majority and the rest of the values is statistically significant) were from the ECO code category C, with its count 
+more than double the rest of the values. The C class is comprised of variations of the French Defense and Spanish Game.
+
+For black, there were 40 openings with a win percentage higher than 45%. There was no apparent majority. 
+
+Question Two: 
+The correlation between the openings' development levels and win rates for the white side was -0.02724541071810767 and -0.2073744849309893
+for black, and these coefficients are not significantly different. This means that no matter the color being played, there is a very weak 
+correlationbetween the development level and win rate, as the values are very far from 1. The negative signifies that the more an opening is 
+developed, the lower the win rate, but this correlation is practically negligible because it is so weak. 
+
+Question Three: 
+The correlation between the openings' popularity and win rates for the white side was -0.12315606539763795 and -0.02732113170813687,
+and these coefficients are also not significantly different. This means that for an increase in popularity, a its win rate decreases, but 
+this correlation is again negligible.
+
+Question Four: 
+
+There were 245 openings on the white side in which higher-rated players used slightly more frequently compared to the overall frequencies, 
+and 256 openings on the black side. However, the differences in z-scores were very small, ranging from ~0.04 to 0.6, resulting in p-values 
+between ~0.2 and 0.4. Since all the p-values are greater than the alpha level of 5%,  there are no openings that higher-rated 
+players consistently favor over others based on their ECO codes. Therefore, no specific group of openings stands out as being more commonly 
+used by higher-rated players.
+
+CONCLUSION:
+Overall, these results suggest that while certain openings are clearly more successful than others (especially for white), the success of 
+an opening is not strongly tied to its development level, popularity, or its use by higher-rated players. The data presents a nuanced view 
+of chess strategy at the intermediate level, where success seems more contingent on player choice and execution rather than overarching 
+patterns of opening trends. Given more time and data, I would want to explore more questions, for example: 
+    1. How do the success rates of openings vary across different player rating ranges (e.g., 1000-1200, 1200-1400, etc.)? Are certain openings 
+    more successful at different skill levels? 
+    2. Contextual Factors: How do specific openings perform in different game formats (e.g., blitz, classical, correspondence)? 
+    Do some openings perform better in fast-paced games while others are more effective in longer, strategic matches?
+By addressing these questions, future research could provide deeper insights into how opening choices evolve with player strength and game 
+conditions. I would also want to explore machine learning applications for this dataset, for instance, giving a program specific attributes
+and it identifying its opening, win rate, etc. For example, I could give a program a list of moves, its color, ECO code, and other variables
+and the program would output its potential win rate. 
+
+SOURCES:
+1. Pearson's Correlation Coefficient: https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+2. Fisher Transformation: https://en.wikipedia.org/wiki/Fisher_transformation
+3. Encyclopedia of Chess Openings: https://en.wikipedia.org/wiki/Encyclopaedia_of_Chess_Openings
+4. Normal Distribution Generator: https://stackoverflow.com/questions/9242907/how-do-i-generate-normal-cumulative-distribution-in-java-its-inverse-cdf-how
+5. "Good" Win Rates for White and Black: https://en.wikipedia.org/wiki/First-move_advantage_in_chess
+6. Regex: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html
+        https://regex101.com/
+        https://www.baeldung.com/java-regex-lookahead-lookbehind
+
